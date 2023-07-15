@@ -1,0 +1,22 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+.gameboard {
+  width: 30vw;
+  height: 30vw;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+}
+
+.grid {
+  border: 0.1rem solid black;
+  display: grid;
+  place-items: center;
+}
+
+i.fa-solid {
+    color: black;
+    font-size: 8vw;
+}
