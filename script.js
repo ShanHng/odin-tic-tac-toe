@@ -60,13 +60,13 @@ const gameController = (() => {
   let isPlayerOneTurn = true
   let curPlayer = ''
   let winner = ''
+  let result = ''
 
-  const getWinningMessage = () => {
-    return `${winner.getName()} has won the game!`
-  }
-  const getTurnMessage = () => {
-    return `${curPlayer.getName()}'s turn...`
-  }
+  const getWinningMessage = () => `${winner.getName()} has won the game!`
+
+  const getTurnMessage = () => `${curPlayer.getName()}'s turn...`
+
+  const getDrawMessage = () => "Game has ended. It's a draw!"
 
   const changePlayer = () => {
     isPlayerOneTurn = !isPlayerOneTurn
@@ -81,9 +81,12 @@ const gameController = (() => {
       const currentBoard = gameboard.toArray()
       screenController.updateGameboard(currentBoard)
 
-      if (isGameOver(currentBoard)) {
+      result = isGameOver(currentBoard)
+      if (result) {
         winner = curPlayer
-        screenController.updateResultBox(getWinningMessage())
+        screenController.updateResultBox(
+          result === 'DRAW' ? getDrawMessage() : getWinningMessage()
+        )
         return
       }
 
@@ -91,6 +94,7 @@ const gameController = (() => {
     }
   }
 
+  // returns
   function isGameOver (board) {
     return (
       (board[1] && board[0] === board[1] && board[1] === board[2]) ||
@@ -100,7 +104,8 @@ const gameController = (() => {
       (board[4] && board[2] === board[4] && board[6] === board[4]) ||
       (board[3] && board[0] === board[3] && board[6] === board[3]) ||
       (board[4] && board[1] === board[4] && board[7] === board[4]) ||
-      (board[5] && board[2] === board[5] && board[8] === board[5])
+      (board[5] && board[2] === board[5] && board[8] === board[5]) ||
+      (board.reduce((a, b) => a && b, true) && 'DRAW')
     )
   }
 
