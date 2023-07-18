@@ -1,19 +1,15 @@
 // Models
 
 const cellFactory = () => {
-  const isMarked = false
-  const player = ''
+  let player = ''
 
   // exposed functions
-  const checkIfMarked = () => isMarked
+  const isMarked = () => Boolean(player)
   const getPlayer = () => player
-  const mark = () => {
-    this.isMarked = !isMarked
+  const setPlayer = person => {
+    player = person
   }
-  const setPlayer = player => {
-    this.player = player
-  }
-  return { checkIfMarked, getPlayer, mark, setPlayer }
+  return { isMarked, getPlayer, setPlayer }
 }
 
 const gameboard = (() => {
@@ -23,6 +19,30 @@ const gameboard = (() => {
   for (let i = 0; i < 9; i++) {
     board.push(cellFactory())
   }
+
+  function mark (index, player) {
+    const cell = board[index]
+    cell.setPlayer(player)
+  }
+
+  function toArray () {
+    const result = []
+    for (cell of board) {
+      if (!cell.isMarked()) {
+        result.push('')
+        continue
+      }
+
+      result.push(cell.getPlayer().getToken())
+    }
+    return result
+  }
+
+  function isCellMarked (index) {
+    return board[index].isMarked()
+  }
+
+  return { mark, isCellMarked, toArray }
 })()
 
 const playerFactory = (playerName, playerToken) => {
@@ -37,35 +57,51 @@ const playerFactory = (playerName, playerToken) => {
 const gameController = (() => {
   const playerOne = playerFactory('Player 1', 'X')
   const playerTwo = playerFactory('Player 2', 'O')
+  let isPlayerOneTurn = true
 
-  const start = () => {
-    while (!gameboard.isOver()) {}
+  const changePlayer = () => {
+    isPlayerOneTurn = !isPlayerOneTurn
   }
+
+  const playMove = number => {
+    if (!gameboard.isCellMarked(number)) {
+      gameboard.mark(number, isPlayerOneTurn ? playerOne : playerTwo)
+      changePlayer()
+    }
+  }
+
+  return { playMove }
 })()
 
 const screenController = (() => {
   const turnIndicator = document.querySelector('.turn-indicator')
   const resultBox = document.querySelector('.result-box')
-  const gameboard = document.querySelector('.gameboard')
+  const board = document.querySelector('.gameboard')
 
   // initialize board with grids
   const initializeBoard = () => {
     for (let i = 0; i < 9; i++) {
       const grid = document.createElement('div')
       grid.className = 'grid'
-      gameboard.append(grid)
+      grid.addEventListener('click', () => {
+        gameController.playMove(i)
+        // console.log(gameboard.toArray())
+        updateGameboard()
+      })
+      board.append(grid)
     }
   }
 
-  const updateGameboard = (board) => {
+  const updateGameboard = () => {
+    const currentBoard = gameboard.toArray()
     for (let i = 0; i < 9; i++) {
-      const grid = document.querySelector(`.grid:nth-child(${i+1})`)
-      if (board[i] === 'O') {
+      const grid = document.querySelector(`.grid:nth-child(${i + 1})`)
+      if (currentBoard[i] === 'O') {
         grid.innerHTML = '<i class="fa-solid fa-o"></i>'
         continue
       }
 
-      if (board[i] === 'X') {
+      if (currentBoard[i] === 'X') {
         grid.innerHTML = '<i class="fa-solid fa-x"></i>'
         continue
       }
@@ -76,4 +112,4 @@ const screenController = (() => {
 })()
 
 screenController.initializeBoard()
-screenController.updateGameboard(['X', 'X', 'O', '', '', '', '', '', ''])
+// screenController.updateGameboard(['X', 'X', 'O', '', '', '', '', '', ''])
