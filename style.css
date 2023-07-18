@@ -20,3 +20,9 @@ i.fa-solid {
     color: black;
     font-size: 8vw;
 }
+
+.result-box {
+    border: 0.5rem solid black;
+    height: 10vh;
+    width: 80vw;
+}

@@ -58,19 +58,59 @@ const gameController = (() => {
   const playerOne = playerFactory('Player 1', 'X')
   const playerTwo = playerFactory('Player 2', 'O')
   let isPlayerOneTurn = true
+  let curPlayer = ''
+  let winner = ''
+
+  const getWinningMessage = () => {
+    return `${winner.getName()} has won the game!`
+  }
+  const getTurnMessage = () => {
+    return `${curPlayer.getName()}'s turn...`
+  }
 
   const changePlayer = () => {
     isPlayerOneTurn = !isPlayerOneTurn
+    curPlayer = isPlayerOneTurn ? playerOne : playerTwo
+    screenController.updateResultBox(getTurnMessage())
   }
 
   const playMove = number => {
-    if (!gameboard.isCellMarked(number)) {
-      gameboard.mark(number, isPlayerOneTurn ? playerOne : playerTwo)
+    if (!gameboard.isCellMarked(number) && !winner) {
+      gameboard.mark(number, curPlayer)
+
+      const currentBoard = gameboard.toArray()
+      screenController.updateGameboard(currentBoard)
+
+      if (isGameOver(currentBoard)) {
+        winner = curPlayer
+        screenController.updateResultBox(getWinningMessage())
+        return
+      }
+
       changePlayer()
     }
   }
 
-  return { playMove }
+  function isGameOver (board) {
+    return (
+      (board[1] && board[0] === board[1] && board[1] === board[2]) ||
+      (board[4] && board[3] === board[4] && board[4] === board[5]) ||
+      (board[7] && board[6] === board[7] && board[8] === board[7]) ||
+      (board[4] && board[0] === board[4] && board[8] === board[4]) ||
+      (board[4] && board[2] === board[4] && board[6] === board[4]) ||
+      (board[3] && board[0] === board[3] && board[6] === board[3]) ||
+      (board[4] && board[1] === board[4] && board[7] === board[4]) ||
+      (board[5] && board[2] === board[5] && board[8] === board[5])
+    )
+  }
+
+  function start () {
+    curPlayer = playerOne
+    screenController.updateResultBox(getTurnMessage())
+    screenController.initializeBoard()
+  }
+
+  return { playMove, start }
 })()
 
 const screenController = (() => {
@@ -85,31 +125,31 @@ const screenController = (() => {
       grid.className = 'grid'
       grid.addEventListener('click', () => {
         gameController.playMove(i)
-        // console.log(gameboard.toArray())
-        updateGameboard()
       })
       board.append(grid)
     }
   }
 
-  const updateGameboard = () => {
-    const currentBoard = gameboard.toArray()
+  const updateGameboard = board => {
     for (let i = 0; i < 9; i++) {
       const grid = document.querySelector(`.grid:nth-child(${i + 1})`)
-      if (currentBoard[i] === 'O') {
+      if (board[i] === 'O') {
         grid.innerHTML = '<i class="fa-solid fa-o"></i>'
         continue
       }
 
-      if (currentBoard[i] === 'X') {
+      if (board[i] === 'X') {
         grid.innerHTML = '<i class="fa-solid fa-x"></i>'
         continue
       }
     }
   }
 
-  return { initializeBoard, updateGameboard }
+  const updateResultBox = function (message) {
+    resultBox.innerHTML = message
+  }
+
+  return { initializeBoard, updateGameboard, updateResultBox }
 })()
 
-screenController.initializeBoard()
-// screenController.updateGameboard(['X', 'X', 'O', '', '', '', '', '', ''])
+gameController.start()
