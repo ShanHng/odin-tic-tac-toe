@@ -13,12 +13,9 @@ const cellFactory = () => {
 }
 
 const gameboard = (() => {
-  const board = []
+  let board = []
 
-  // fill gameboard with cells
-  for (let i = 0; i < 9; i++) {
-    board.push(cellFactory())
-  }
+  reset()
 
   function mark (index, player) {
     const cell = board[index]
@@ -42,7 +39,14 @@ const gameboard = (() => {
     return board[index].isMarked()
   }
 
-  return { mark, isCellMarked, toArray }
+  function reset () {
+    board = []
+    for (let i = 0; i < 9; i++) {
+      board.push(cellFactory())
+    }
+  }
+
+  return { mark, isCellMarked, toArray, reset }
 })()
 
 const playerFactory = (playerName, playerToken) => {
@@ -61,12 +65,16 @@ const gameController = (() => {
   let curPlayer = ''
   let winner = ''
   let result = ''
+  let hasGameStarted = false
 
-  const getWinningMessage = () => `${winner.getName()} has won the game!`
+  const getWinningMessage = () =>
+    `${winner.getName()} has won the game! Click START to replay!`
 
   const getTurnMessage = () => `${curPlayer.getName()}'s turn...`
 
   const getDrawMessage = () => "Game has ended. It's a draw!"
+
+  const getStartMessage = () => 'Click on START to begin!'
 
   const changePlayer = () => {
     isPlayerOneTurn = !isPlayerOneTurn
@@ -75,7 +83,7 @@ const gameController = (() => {
   }
 
   const playMove = number => {
-    if (!gameboard.isCellMarked(number) && !winner) {
+    if (!gameboard.isCellMarked(number) && !winner && hasGameStarted) {
       gameboard.mark(number, curPlayer)
 
       const currentBoard = gameboard.toArray()
@@ -88,6 +96,7 @@ const gameController = (() => {
           result === 'DRAW' ? getDrawMessage() : getWinningMessage(),
           true
         )
+        screenController.showGameboardCover(true)
         return
       }
 
@@ -110,21 +119,38 @@ const gameController = (() => {
     )
   }
 
-  function start () {
-    curPlayer = playerOne
-    screenController.updateResultBox(getTurnMessage(), false)
-    screenController.initializeBoard()
+  function run () {
+    screenController.updateResultBox(getStartMessage(), false)
+    screenController.initializeElements()
+    screenController.showGameboardCover(true)
   }
 
-  return { playMove, start }
+  function startGame () {
+    // reset internal gameboard state and clearing the screen
+    gameboard.reset()
+    screenController.updateGameboard(gameboard.toArray(), false)
+    screenController.showGameboardCover(false)
+
+    hasGameStarted = true
+    curPlayer = playerOne
+    winner = ''
+    screenController.updateResultBox(getTurnMessage(), false)
+  }
+
+  return { playMove, startGame, run }
 })()
 
 const screenController = (() => {
   const resultBox = document.querySelector('.result-box')
   const board = document.querySelector('.gameboard')
+  const startButton = document.querySelector('.start-button')
+  const gameboardCover = document.querySelector('.gameboard-disable')
 
-  // initialize board with grids
-  const initializeBoard = () => {
+  const showGameboardCover = force => {
+    gameboardCover.style.display = force ? 'block' : 'none'
+  }
+
+  const initializeElements = () => {
     for (let i = 0; i < 9; i++) {
       const grid = document.createElement('div')
       grid.className = 'grid'
@@ -133,6 +159,7 @@ const screenController = (() => {
       })
       board.append(grid)
     }
+    startButton.addEventListener('click', () => gameController.startGame())
   }
 
   const updateGameboard = board => {
@@ -147,6 +174,8 @@ const screenController = (() => {
         grid.innerHTML = '<i class="fa-solid fa-x"></i>'
         continue
       }
+
+      grid.innerHTML = ''
     }
   }
 
@@ -160,7 +189,12 @@ const screenController = (() => {
     }
   }
 
-  return { initializeBoard, updateGameboard, updateResultBox }
+  return {
+    initializeElements,
+    updateGameboard,
+    updateResultBox,
+    showGameboardCover
+  }
 })()
 
-gameController.start()
+gameController.run()

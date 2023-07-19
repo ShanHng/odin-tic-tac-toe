@@ -10,7 +10,13 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 5vh;
-  padding: 5vh;
+  margin: 5vh;
+  position: relative;
+}
+
+.control-panel {
+  display: flex;
+  gap: 2rem;
 }
 
 .gameboard {
@@ -49,7 +55,6 @@ i.fa-solid {
   color: rgb(248, 76, 76);
 }
 
-
 /* Code reuse for flash animation from https://www.tutorialspoint.com/css/css_animation_flash.htm */
 .flash {
   -webkit-animation-duration: 0.5s;
@@ -71,4 +76,28 @@ i.fa-solid {
   83% {
     opacity: 0;
   }
+}
+
+.gameboard-disable {
+  width: 35vw;
+  height: 35vw;
+  background-color: gray;
+  position: absolute;
+  top: calc(2.5rem + 15vh);
+  opacity: 0.9;
+  z-index: 5;
+}
+
+.start-button {
+  color: white;
+  font-weight: bolder;
+  background-color: rgb(228, 0, 0);
+  font-size: 2rem;
+  padding: 1rem;
+  outline: none;
+  align-self: center;
+}
+
+.start-button:active {
+  opacity: 0.7;
 }
