@@ -71,7 +71,7 @@ const gameController = (() => {
   const changePlayer = () => {
     isPlayerOneTurn = !isPlayerOneTurn
     curPlayer = isPlayerOneTurn ? playerOne : playerTwo
-    screenController.updateResultBox(getTurnMessage())
+    screenController.updateResultBox(getTurnMessage(), false)
   }
 
   const playMove = number => {
@@ -85,7 +85,8 @@ const gameController = (() => {
       if (result) {
         winner = curPlayer
         screenController.updateResultBox(
-          result === 'DRAW' ? getDrawMessage() : getWinningMessage()
+          result === 'DRAW' ? getDrawMessage() : getWinningMessage(),
+          true
         )
         return
       }
@@ -111,7 +112,7 @@ const gameController = (() => {
 
   function start () {
     curPlayer = playerOne
-    screenController.updateResultBox(getTurnMessage())
+    screenController.updateResultBox(getTurnMessage(), false)
     screenController.initializeBoard()
   }
 
@@ -119,7 +120,6 @@ const gameController = (() => {
 })()
 
 const screenController = (() => {
-  const turnIndicator = document.querySelector('.turn-indicator')
   const resultBox = document.querySelector('.result-box')
   const board = document.querySelector('.gameboard')
 
@@ -150,8 +150,14 @@ const screenController = (() => {
     }
   }
 
-  const updateResultBox = function (message) {
+  const updateResultBox = function (message, isGameOver) {
+    // reset the class list upon every update
+    resultBox.className = 'result-box'
+
     resultBox.innerHTML = message
+    if (isGameOver) {
+      resultBox.classList.add('flash')
+    }
   }
 
   return { initializeBoard, updateGameboard, updateResultBox }
