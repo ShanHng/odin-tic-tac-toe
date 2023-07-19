@@ -82,6 +82,14 @@ const gameController = (() => {
     screenController.updateResultBox(getTurnMessage(), false)
   }
 
+  const endGame = () => {
+    winner = curPlayer
+    screenController.updateResultBox(
+      result === 'DRAW' ? getDrawMessage() : getWinningMessage(),
+      true
+    )
+  }
+
   const playMove = number => {
     if (!gameboard.isCellMarked(number) && !winner && hasGameStarted) {
       gameboard.mark(number, curPlayer)
@@ -91,11 +99,7 @@ const gameController = (() => {
 
       result = isGameOver(currentBoard)
       if (result) {
-        winner = curPlayer
-        screenController.updateResultBox(
-          result === 'DRAW' ? getDrawMessage() : getWinningMessage(),
-          true
-        )
+        endGame()
         screenController.showGameboardCover(true)
         return
       }
@@ -125,20 +129,24 @@ const gameController = (() => {
   }
 
   function startGame (playerOneName, playerTwoName) {
-    // create players
+    reset()
+    // create new players
     playerOne = playerFactory(playerOneName, 'X')
     playerTwo = playerFactory(playerTwoName, 'O')
 
-    // reset internal gameboard state and clearing the screen
+    screenController.showGameboardCover(false)
+    screenController.updateResultBox(getTurnMessage(), false)
+  }
+
+  function reset () {
     gameboard.reset()
     screenController.updateGameboard(gameboard.toArray(), false)
-    screenController.showGameboardCover(false)
-
+    formController.resetFormInputs()
+    
     hasGameStarted = true
     curPlayer = playerOne
     isPlayerOneTurn = true
     winner = ''
-    screenController.updateResultBox(getTurnMessage(), false)
   }
 
   return { playMove, startGame, run }
@@ -149,14 +157,6 @@ const screenController = (() => {
   const board = document.querySelector('.gameboard')
   const startButton = document.querySelector('.start-button')
   const gameboardCover = document.querySelector('.gameboard-disable')
-  const formButton = document.querySelector('form>button')
-  const form = document.querySelector('#player-name-form')
-  const playerOneName = document.getElementById('player-one-name')
-  const playerTwoName = document.getElementById('player-two-name')
-
-  const showForm = force => {
-    form.style.display = force ? 'flex' : 'none'
-  }
 
   const showGameboardCover = force => {
     gameboardCover.style.display = force ? 'flex' : 'none'
@@ -172,12 +172,7 @@ const screenController = (() => {
       board.append(grid)
     }
     startButton.addEventListener('click', () => {
-      showForm(true)
-    })
-    form.addEventListener('submit', e => {
-      e.preventDefault()
-      showForm(false)
-      gameController.startGame(playerOneName.value, playerTwoName.value)
+      formController.showForm(true)
     })
   }
 
@@ -214,6 +209,31 @@ const screenController = (() => {
     updateResultBox,
     showGameboardCover
   }
+})()
+
+const formController = (() => {
+  const form = document.querySelector('#player-name-form')
+  const playerOneName = document.getElementById('player-one-name')
+  const playerTwoName = document.getElementById('player-two-name')
+
+  const handleFormSubmit = e => {
+    e.preventDefault()
+    showForm(false)
+    gameController.startGame(playerOneName.value, playerTwoName.value)
+  }
+
+  form.addEventListener('submit', e => handleFormSubmit(e))
+
+  const showForm = force => {
+    form.style.display = force ? 'flex' : 'none'
+  }
+
+  const resetFormInputs = () => {
+    playerOneName.value = 'Player 1'
+    playerTwoName.value = 'Player 2'
+  }
+
+  return { showForm, resetFormInputs }
 })()
 
 gameController.run()
