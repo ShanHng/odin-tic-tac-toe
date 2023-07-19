@@ -59,8 +59,8 @@ const playerFactory = (playerName, playerToken) => {
 }
 
 const gameController = (() => {
-  const playerOne = playerFactory('Player 1', 'X')
-  const playerTwo = playerFactory('Player 2', 'O')
+  let playerOne = ''
+  let playerTwo = ''
   let isPlayerOneTurn = true
   let curPlayer = ''
   let winner = ''
@@ -104,7 +104,6 @@ const gameController = (() => {
     }
   }
 
-  // returns
   function isGameOver (board) {
     return (
       (board[1] && board[0] === board[1] && board[1] === board[2]) ||
@@ -125,7 +124,11 @@ const gameController = (() => {
     screenController.showGameboardCover(true)
   }
 
-  function startGame () {
+  function startGame (playerOneName, playerTwoName) {
+    // create players
+    playerOne = playerFactory(playerOneName, 'X')
+    playerTwo = playerFactory(playerTwoName, 'O')
+
     // reset internal gameboard state and clearing the screen
     gameboard.reset()
     screenController.updateGameboard(gameboard.toArray(), false)
@@ -133,6 +136,7 @@ const gameController = (() => {
 
     hasGameStarted = true
     curPlayer = playerOne
+    isPlayerOneTurn = true
     winner = ''
     screenController.updateResultBox(getTurnMessage(), false)
   }
@@ -145,9 +149,17 @@ const screenController = (() => {
   const board = document.querySelector('.gameboard')
   const startButton = document.querySelector('.start-button')
   const gameboardCover = document.querySelector('.gameboard-disable')
+  const formButton = document.querySelector('form>button')
+  const form = document.querySelector('#player-name-form')
+  const playerOneName = document.getElementById('player-one-name')
+  const playerTwoName = document.getElementById('player-two-name')
+
+  const showForm = force => {
+    form.style.display = force ? 'flex' : 'none'
+  }
 
   const showGameboardCover = force => {
-    gameboardCover.style.display = force ? 'block' : 'none'
+    gameboardCover.style.display = force ? 'flex' : 'none'
   }
 
   const initializeElements = () => {
@@ -159,7 +171,14 @@ const screenController = (() => {
       })
       board.append(grid)
     }
-    startButton.addEventListener('click', () => gameController.startGame())
+    startButton.addEventListener('click', () => {
+      showForm(true)
+    })
+    form.addEventListener('submit', e => {
+      e.preventDefault()
+      showForm(false)
+      gameController.startGame(playerOneName.value, playerTwoName.value)
+    })
   }
 
   const updateGameboard = board => {

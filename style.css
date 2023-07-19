@@ -101,3 +101,45 @@ i.fa-solid {
 .start-button:active {
   opacity: 0.7;
 }
+
+form {
+  background-color: black;
+  color: yellow;
+  font-family: monospace;
+  display: none;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  width: 50vw;
+  position: absolute;
+  z-index: 100;
+  font-size: 2rem;
+}
+
+input {
+  outline: none;
+  border: 0.1rem solid yellow;
+  background-color: transparent;
+  height: 3rem;
+  width: 45%;
+  color: yellow;
+  font-size: 2rem;
+  font-weight: bold;
+  padding-left: 0.5rem;
+}
+
+button[form='player-name-form'] {
+  outline: none;
+  border: 0.1rem solid yellow;
+  background-color: transparent;
+  height: 3rem;
+  width: 45%;
+  color: yellow;
+  font-size: 2rem;
+  font-weight: bold;
+  align-self: center;
+}
+
+button[form='player-name-form']:hover {
+  background-color: rgba(255, 255, 0, 0.3);
+}
